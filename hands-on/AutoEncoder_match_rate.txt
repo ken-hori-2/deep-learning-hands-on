@@ -1,0 +1,81 @@
+(dl) C:\Users\0107409377\Desktop\code\dl\hands-on\src\AE>python ae.py
+epoch: 0, loss: 0.003272663364559412
+num: 1875
+batch size: 32
+size: 32, 32
+バッチサイズ32×1875loop中 59436/60000一致 ... 正解率: 99.06
+pred:3, labels:3
+1. labels(num):3
+2. labels(%):tensor([ -9.8707,   0.4198,  -6.2905,  14.2216, -12.3367,  -3.1245, -19.7694,
+          4.9025,  -1.6089,  -3.7530], grad_fn=<SelectBackward0>) : max:3
+*****************************************
+num: 1875
+batch size: 32
+size: 32, 32
+output size: 32, 中身: tensor([ -9.8707,   0.4198,  -6.2905,  14.2216, -12.3367,  -3.1245, -19.7694,
+          4.9025,  -1.6089,  -3.7530], grad_fn=<SelectBackward0>), max: 3
+*****************************************
+***** validation result *****
+
+(dl) C:\Users\0107409377\Desktop\code\dl\hands-on\src\AE>python ae.py
+epoch: 0, loss: 0.003272403728837768
+num: 1875
+batch size: 32
+size: 32, 32
+バッチサイズ32×1875loop中 59425/60000一致 ... 正解率: 99.04166666666666
+pred:6, labels:6
+1. labels(num):6
+2. labels(%):tensor([ -1.5686, -11.8098, -18.1873, -31.0146, -11.4613,   2.1813,  38.3803,
+        -32.7093,  -4.1461, -14.7304], grad_fn=<SelectBackward0>) : max:6
+*****************************************
+num: 1875
+batch size: 32
+size: 32, 32
+output size: 32, 中身: tensor([ -1.5686, -11.8098, -18.1873, -31.0146, -11.4613,   2.1813,  38.3803,
+        -32.7093,  -4.1461, -14.7304], grad_fn=<SelectBackward0>), max: 6
+*****************************************
+***** validation result *****
+
+
+
+
+
+
+
+
+
+
+
+
+# AE_and_mlp_recog_rate.py
+
+(dl) C:\Users\0107409377\Desktop\code\dl\hands-on\src\AE>python "AE&mlp_recog_rate.py"
+epoch: 0, loss: 0.0032710173218200604
+
+num: 1875
+batch size: 32
+size: 32, 32
+
+AE&mlp_recog_rate.py:166: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  imgs = torch.tensor(ae_result_imgs[num])
+AE&mlp_recog_rate.py:167: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  labels = torch.tensor(ae_result_labels[num])
+
+
+バッチサイズ32×1875loop中 59428/60000一致 ... 正解率: 99.04666666666667
+
+pred:6, labels:6
+
+1. labels(num):6
+2. labels(%):tensor([  3.0409, -10.9990, -17.7756, -24.6745,  -7.6901,  -1.0934,  32.2430,
+        -21.8775,  -2.1750, -15.7193], grad_fn=<SelectBackward0>) : max:6
+*****************************************
+
+
+num: 1875
+batch size: 32
+size: 32, 32
+output size: 32, 中身: tensor([  3.0409, -10.9990, -17.7756, -24.6745,  -7.6901,  -1.0934,  32.2430,
+        -21.8775,  -2.1750, -15.7193], grad_fn=<SelectBackward0>), max: 6
+*****************************************
+***** validation result *****

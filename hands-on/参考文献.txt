@@ -1,0 +1,11 @@
+
+【公式】torchvision datasets
+https://pytorch.org/vision/stable/datasets.html
+
+【必読】PyTorchのDatasetの使い方｜カスタム（自作）Datasetも作成できる！
+https://dreamer-uma.com/pytorch-dataset/
+
+# trainモードとevalモード
+https://qiita.com/tatsuya11bbs/items/86141fe3ca35bdae7338
+
+https://python-jp.dev/articles/304147642

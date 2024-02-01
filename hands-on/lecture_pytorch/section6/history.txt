@@ -1,0 +1,91 @@
+(dl) C:\Users\0107409377\Desktop\code\dl\hands-on\lecture_pytorch\section6>python train_cnn.py
+Downloading https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz to ./data\cifar-10-python.tar.gz
+100.0%
+Extracting ./data\cifar-10-python.tar.gz to ./data
+Files already downloaded and verified
+
+
+Net(
+  (conv1): Conv2d(3, 6, kernel_size=(5, 5), stride=(1, 1))
+  (pool): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  (conv2): Conv2d(6, 16, kernel_size=(5, 5), stride=(1, 1))
+  (fc1): Linear(in_features=400, out_features=256, bias=True)
+  (dropout): Dropout(p=0.5, inplace=False)
+  (fc2): Linear(in_features=256, out_features=10, bias=True)
+)
+
+
+Epoch: 0 Loss_Train: 1.8029918248391212 Loss_Test: 1.5842232704162598
+Epoch: 1 Loss_Train: 1.5736992167085029 Loss_Test: 1.4200273752212524
+Epoch: 2 Loss_Train: 1.5041277190608442 Loss_Test: 1.380595326423645
+Epoch: 3 Loss_Train: 1.4547203213662443 Loss_Test: 1.3242390155792236
+Epoch: 4 Loss_Train: 1.418697259462703 Loss_Test: 1.2993501424789429
+Epoch: 5 Loss_Train: 1.3917315599253721 Loss_Test: 1.2776377201080322
+Epoch: 6 Loss_Train: 1.3716876410767245 Loss_Test: 1.2457736730575562
+Epoch: 7 Loss_Train: 1.346309425199733 Loss_Test: 1.2301257848739624
+Epoch: 8 Loss_Train: 1.3367439442888245 Loss_Test: 1.2019720077514648
+Epoch: 9 Loss_Train: 1.3189693767091502 Loss_Test: 1.209938883781433
+Epoch: 10 Loss_Train: 1.3076477756585612 Loss_Test: 1.1738396883010864
+Epoch: 11 Loss_Train: 1.2929272374228749 Loss_Test: 1.1610852479934692
+Epoch: 12 Loss_Train: 1.282381452867747 Loss_Test: 1.1575390100479126
+Epoch: 13 Loss_Train: 1.2759816764718126 Loss_Test: 1.1468942165374756
+Epoch: 14 Loss_Train: 1.268057995135217 Loss_Test: 1.152506947517395
+Epoch: 15 Loss_Train: 1.2578070796359226 Loss_Test: 1.1658079624176025
+Epoch: 16 Loss_Train: 1.2510122223126003 Loss_Test: 1.1520273685455322
+Epoch: 17 Loss_Train: 1.2457475311615889 Loss_Test: 1.12959623336792
+Epoch: 18 Loss_Train: 1.2400415614437874 Loss_Test: 1.1067044734954834
+Epoch: 19 Loss_Train: 1.231585166567122 Loss_Test: 1.1010793447494507
+
+
+conv1.weight :  torch.Size([6, 3, 5, 5])
+conv1.bias :  torch.Size([6])
+conv2.weight :  torch.Size([16, 6, 5, 5])
+conv2.bias :  torch.Size([16])
+fc1.weight :  torch.Size([256, 400])
+fc1.bias :  torch.Size([256])
+fc2.weight :  torch.Size([10, 256])
+fc2.bias :  torch.Size([10])
+tensor([[[ 0.0237, -0.0082, -0.1036,  0.1008,  0.0512],
+         [-0.0366,  0.0512, -0.0881,  0.0853,  0.0306],
+         [-0.0051,  0.0036,  0.0086,  0.1213, -0.0235],
+         [ 0.0427,  0.1317,  0.1239,  0.0569,  0.0036],
+         [ 0.0802,  0.1316,  0.0476,  0.0912,  0.0198]],
+
+        [[-0.0999, -0.0737,  0.0463, -0.1014, -0.0511],
+         [-0.0371,  0.0322,  0.0273, -0.0303,  0.0461],
+         [ 0.0104, -0.0510, -0.0121,  0.0204,  0.0200],
+         [-0.0086, -0.0013, -0.0212,  0.0042,  0.0443],
+         [ 0.0576, -0.0236,  0.0628,  0.0240,  0.0091]],
+
+        [[ 0.1256,  0.0617,  0.1535,  0.0503, -0.0595],
+         [ 0.0312,  0.0764,  0.0916, -0.0406, -0.1449],
+         [-0.0086,  0.0762,  0.1271, -0.1208, -0.0364],
+         [-0.0965,  0.0963,  0.0277,  0.0181, -0.0909],
+         [-0.0320,  0.0363,  0.0797,  0.0025, -0.0111]]])
+conv1.weight :  torch.Size([6, 3, 5, 5])
+conv1.bias :  torch.Size([6])
+conv2.weight :  torch.Size([16, 6, 5, 5])
+conv2.bias :  torch.Size([16])
+fc1.weight :  torch.Size([256, 400])
+fc1.bias :  torch.Size([256])
+fc2.weight :  torch.Size([10, 256])
+fc2.bias :  torch.Size([10])
+tensor([[[ 0.0237, -0.0082, -0.1036,  0.1008,  0.0512],
+         [-0.0366,  0.0512, -0.0881,  0.0853,  0.0306],
+         [-0.0051,  0.0036,  0.0086,  0.1213, -0.0235],
+         [ 0.0427,  0.1317,  0.1239,  0.0569,  0.0036],
+         [ 0.0802,  0.1316,  0.0476,  0.0912,  0.0198]],
+
+        [[-0.0999, -0.0737,  0.0463, -0.1014, -0.0511],
+         [-0.0371,  0.0322,  0.0273, -0.0303,  0.0461],
+         [ 0.0104, -0.0510, -0.0121,  0.0204,  0.0200],
+         [-0.0086, -0.0013, -0.0212,  0.0042,  0.0443],
+         [ 0.0576, -0.0236,  0.0628,  0.0240,  0.0091]],
+
+        [[ 0.1256,  0.0617,  0.1535,  0.0503, -0.0595],
+         [ 0.0312,  0.0764,  0.0916, -0.0406, -0.1449],
+         [-0.0086,  0.0762,  0.1271, -0.1208, -0.0364],
+         [-0.0965,  0.0963,  0.0277,  0.0181, -0.0909],
+         [-0.0320,  0.0363,  0.0797,  0.0025, -0.0111]]])
+
+(dl) C:\Users\0107409377\Desktop\code\dl\hands-on\lecture_pytorch\section6>
