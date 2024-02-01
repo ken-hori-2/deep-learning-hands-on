@@ -1,0 +1,79 @@
+
+# 以下に従って進める
+
+【AWS EC2入門】クラウド上にサーバを構築！SSH接続してFlaskのWebアプリをデプロイしてみよう！〜初心者向け〜
+https://www.youtube.com/watch?v=AGmkG0wJ8LA
+
+# EC2上にアプリをデプロイする手順
+    0. キーペア作成(1回作成したらそれを使えばいい)
+        0-1. キーペアのタイプ
+            > RSA
+        0-2. プライベートキーファイル形式
+            > .pem
+        0-3. 作成したプライベートキー(.pem)を以下のフォルダに格納
+            Mac: /Users/<ユーザー名>/.ssh
+                > +でMacの場合は "chmod 400 ~/.shh/<プライベートキーのファイル名>" をコマンドで実行
+            Windows: C:/Users/<ユーザー名>/.ssh
+                > 社用PC: C:/Users/0107409377/.ssh/aws_ken.pem
+    
+    1. EC2を構築
+        1-1. AMI
+            > Ubuntu 22.04
+        2-1. インスタンスタイプ
+            > t2.microだとメモリ1GBでtorchをインストールできないので、もう少しスペックを上げる
+        2-3. キーペア
+            > "0." で作成したキーペアを使用する
+        2-4. ネットワーク設定
+            > HTTPS, HTTPトラフィックを許可
+    
+    2. EC2にSSHで接続
+        2-1. 作成したインスタンスの接続画面からSSHクライアントを開く
+            > 例の部分をコピーして、".pem(プライベートキー)のファイルパス" を変更
+            
+        2-2. 以下のコマンドを実行
+            この際、ホスト名(54-152-97-253の部分)はインスタンスを起動するたびに変わることに注意
+            Ubuntuの部分もAMIの種類によって変わる(ユーザー名)
+                > ssh -i "C:/Users/0107409377/.ssh/aws_ken.pem" ubuntu@ec2-<この部分>.compute-1.amazonaws.com
+                    今回の場合:
+                        >ssh -i "C:/Users/0107409377/.ssh/aws_ken.pem" ubuntu@ec2-54-152-97-253.compute-1.amazonaws.com
+                
+                *** ホスト名はパブリックIPv4アドレスの部分からも確認可能 ***
+    
+    3. EC2内での操作
+        3-1. 必要なパッケージをインストール
+            $ sudo apy install python-is-python3
+            $ sudo apt update
+            $ sudo apt install python3-pip
+            $ sudo pip install flask
+    
+    4. VSCodeからEC2のリポジトリにアクセス
+        4-1. 拡張機能をインストール
+            > Remote - SSH
+        4-2. 左のバーから "リモートエクスプローラー"を選択
+        4-3. SSHの+を押してSSH接続コマンドを入力
+            "2-2." のコマンドを実行
+                > ssh -i "C:/Users/0107409377/.ssh/aws_ken.pem" ubuntu@ec2-<ホスト名>.compute-1.amazonaws.com
+            
+            アップデートされたconfigファイルを選択
+                > 何回もやるとconfigファイルの先頭行の方から追加されていくので、前のホスト名などをコメントアウトや削除する必要がある
+            
+            SSHの横のボタンで更新する
+                > SSH直下に作成したEC2のホスト名が表示されるので、そこからリモートデスクトップに接続
+                    表示名: ec2-<ホスト名>.compute-1.amazonaws.com
+                    
+            Linuxを選択
+                > 左下に先ほどの表示名があれば接続成功
+            
+    
+    5. FlaskのWebアプリをデプロイ
+        5-1. コードを記述して、以下のコマンドを実行
+            $ cd ~/home/ubuntu # rootディレクトリに移動
+            $ sudo flask --app <アプリを格納しているフォルダ> run --port 80 --host 0.0.0.0
+
+            >> Reactとかでも同じようにできそう
+        
+        5-2. 以下のURLにアクセス
+            http://<ホスト名>
+            (http://<IPv4アドレス>)
+
+            > インスタンス概要の画面から確認可能
