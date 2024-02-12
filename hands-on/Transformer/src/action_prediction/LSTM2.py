@@ -7,10 +7,18 @@ import pandas as pd
 
 plt.style.use("ggplot")
 
-df = pd.read_csv("data_pred_3.csv",sep=",")
-df.columns = ["date", "youbi", "actions"] # ["datetime","id","value"]
+# # df = pd.read_csv("data_pred_3.csv",sep=",")
+# df = pd.read_csv("data_pred.csv",sep=",")
+# df.columns = ["date", "youbi", "actions"] # ["datetime","id","value"]
+# from datetime import datetime as dt
+# df.date = df.date.apply(lambda d: dt.strptime(str(d), "%Y%m%d%H%M%S"))
+
+df = pd.read_csv("test_small.csv",sep=",")
+# df = pd.read_csv("kabuka_small.csv",sep=",")
+df.columns = ["date", "actions"]
 from datetime import datetime as dt
-df.date = df.date.apply(lambda d: dt.strptime(str(d), "%Y%m%d%H%M%S"))
+df.date = df.date.apply(lambda d: dt.strptime(str(d), "%Y/%m/%d"))
+print("df : ", df)
 
 # # plt.scatter(df['youbi'], df['actions'])
 # plt.plot(df['date'], df['actions'])
@@ -110,7 +118,7 @@ if __name__ == "__main__":
     print(y_seq_t.size())
 
 
-    num_epochs = 1000 # 80
+    num_epochs = 100 # 0 # 80
     losses = []
     for epoch in range(num_epochs): # 今回はミニバッチ学習ではなくてバッチ学習
         
@@ -150,7 +158,8 @@ if __name__ == "__main__":
 
 
     print(index)
-    plt.plot(index, y_pred.detach()) # , color="orange")
+    # plt.plot(index, y[-num_test-1:-1:1], label="true")
+    plt.plot(index, y_pred.detach(), label="pred") # , color="orange")
     # plt.xlim([450, 500])
     plt.show()
     # plt.legend()
