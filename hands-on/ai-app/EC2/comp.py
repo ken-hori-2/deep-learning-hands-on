@@ -37,22 +37,29 @@ def pre_set(data_path):
     pine_files = [file_name for file_name in file_list if obj4 in file_name]
 
     transform = transforms.Compose([
-        transforms.Resize((64, 64)), # 256, 256)), # 入力画像のサイズがバラバラなので、すべて256*256にリサイズする
-        transforms.ToTensor(),
+        transforms.Resize((64, 64)), # 256, 256)), # 入力画像のサイズがバラバラなので、すべて64*64にリサイズする
+        # transforms.ToTensor(),
         
-        # データ拡張のための前処理
-        transforms.RandomHorizontalFlip(), # ランダムに左右を入れ変える
-        transforms.ColorJitter(), # ランダムに画像の色値を変える
-        transforms.RandomRotation(10), # ランダムに画像の回転を行う(今回は10度)
+        # # データ拡張のための前処理
+        # transforms.RandomHorizontalFlip(), # ランダムに左右を入れ変える
+        # transforms.ColorJitter(), # ランダムに画像の色値を変える
+        # transforms.RandomRotation(10), # ランダムに画像の回転を行う(今回は10度)
 
         # EC2用
-        # transforms.Resize((64, 64)), 
+        # transforms.Resize((64, 64)), # 入力画像のサイズがバラバラなので、すべて64*64にリサイズする
         # # transforms.CenterCrop(224),  
         # transforms.RandomHorizontalFlip(),
         # transforms.ColorJitter(), # ランダムに画像の色値を変える
         # transforms.RandomRotation(10), # ランダムに画像の回転を行う(今回は10度)
         # transforms.ToTensor(), 
         # # transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        transforms.RandomAffine([-15, 15], scale=(0.8, 1.2)), # 回転(-15度~15度)とリサイズ(0.8倍~1.2倍)
+        transforms.RandomHorizontalFlip(p=0.5),  # 左右反転
+        transforms.ColorJitter(), # ランダムに画像の色値を変える
+        transforms.ToTensor(), # EC2では最後 (訂正:領域消去や正規化の前) だが、社用PCでは最初にやらないとエラー
+
+        transforms.RandomErasing(p=0.5), # 確率0.5でランダムに領域を消去
+        transforms.Normalize((0.0, 0.0, 0.0), (1.0, 1.0, 1.0)),  # 平均値を0、標準偏差を1に [3チャンネル(RGB)なので3つある]
     ])
 
     
@@ -134,7 +141,11 @@ class MLP(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(200, 100),
             nn.ReLU(inplace=True),
-            nn.Linear(100, 2) # 10)
+
+            # Add
+            nn.Dropout(p=0.5),
+            
+            nn.Linear(100, 4) # 2) # 10)
         )
 
         self.criterion = nn.CrossEntropyLoss()
@@ -225,7 +236,7 @@ class CNN(nn.Module):
         # x = x.view(num_batches, -1) # 画像の順番になっているので、バッチを先頭に持ってくる. 後ろは任意.
         # x = x.reshape(-1, 4*4*128)  # 画像データを1次元に変換
         # x = x.reshape(-1, 16*16*128)  # 軽量化ver.
-        x = x.reshape(x.size(0), -1) # データを1次元に変換 # 全結合の前に必要
+        x = x.reshape(x.size(0), -1) # データを1次元に変換
         "-----"
         x = self.classifier(x)
         return x
@@ -237,6 +248,9 @@ def train(train_dataloader, model):
     accs = [] # 精度
 
     for epoch in range(num_epochs):
+
+        # model.train() # train mode # 今回の記述方法(trainとvalのforを分ける)だとあまり結果に影響なさそう
+
         "(1)"
         # runnin_loss = 0.0
         # running_acc = 0.0
@@ -360,22 +374,28 @@ def train(train_dataloader, model):
     grid_imgs_arr = grid_imgs.numpy()
     plt.figure(figsize=(16, 24))
     plt.imshow(np.transpose(grid_imgs_arr, (1, 2, 0)))
-    plt.show()
+    # plt.show()
+    plt.savefig('result-figure.png')
+    plt.close()
     print("アドレス: {}, {}".format(id(imgs), id(imgs_save)))
     print("type: {}".format(type(imgs_save)))
 
     epochs = range(len(accs))
     plt.style.use("ggplot")
     plt.plot(epochs, losses, label="train loss")
-    plt.figure()
+    # plt.figure()
     plt.plot(epochs, accs, label="accurucy")
     plt.legend()
-    plt.show()
+    # plt.show()
+    plt.savefig('result-data.png')
+    plt.close()
 
 def validation(val_dataloader, model):
     # # パラメータの読み込み
     # param_load = torch.load("model.param")
     # model.load_state_dict(param_load)
+
+    # model.eval() # eval mode # 今回の記述方法(trainとvalのforを分ける)だとあまり結果に影響なさそう
 
     total_correct = 0
     total_data_len = 0
@@ -428,12 +448,22 @@ def validation(val_dataloader, model):
     # 今回のエポックの正答率と損失を求める
     accuracy = total_correct/total_data_len*100  # 予測精度の算出
 
+    print("*************************************************************************************************************")
+    print("予測結果  : {}".format(pred))
+    
+    # data_iter = iter(train_dataloader)
+    # imgs, labels = data_iter.__next__() # 1バッチ分表示(size=32)
+    print("正解ラベル: {}".format(labels))
+    print("*************************************************************************************************************")
+    
     print("正解率: {}".format(accuracy))
 
 if __name__ == "__main__":
     
     # dir_path = "train/"
-    dir_path = "my_data/"
+    # dir_path = "my_data/"
+    dir_path = "train_data"
+
     # apple_files, orange_files, transform = pre_set(dir_path)
     apple_files, orange_files, banana_files, pine_files, transform = pre_set(dir_path)
     # cat_dataset = CatDogDataset(apple_files, dir_path, transform=transform)
@@ -452,15 +482,15 @@ if __name__ == "__main__":
     # data_loader = DataLoader(cat_dog_dataset, batch_size=32, shuffle=True)
     data_loader = DataLoader(dataset, batch_size=32, shuffle=True, drop_last = True)
     
-    data_iter = iter(data_loader)
-    imgs, labels = data_iter.__next__() # 1バッチ分表示(size=32)
-    # print("imgs: {}".format(imgs))
-    print(labels)
-    grid_imgs = torchvision.utils.make_grid(imgs[:32]) # 24]) # 32枚表示
-    grid_imgs_arr = grid_imgs.numpy()
-    plt.figure(figsize=(16, 24))
-    plt.imshow(np.transpose(grid_imgs_arr, (1, 2, 0)))
-    plt.show()
+    # data_iter = iter(data_loader)
+    # imgs, labels = data_iter.__next__() # 1バッチ分表示(size=32)
+    # # print("imgs: {}".format(imgs))
+    # print(labels)
+    # grid_imgs = torchvision.utils.make_grid(imgs[:32]) # 24]) # 32枚表示
+    # grid_imgs_arr = grid_imgs.numpy()
+    # plt.figure(figsize=(16, 24))
+    # plt.imshow(np.transpose(grid_imgs_arr, (1, 2, 0)))
+    # plt.show()
 
     "*** Add ***"
     # DataLoder作成　(評価用)
@@ -502,10 +532,11 @@ if __name__ == "__main__":
         validation(validation_loader, model)
         # パラメータの保存
         params = model.state_dict()
-        torch.save(params, "model.param")
+        # torch.save(params, "model-for-ec2.param")
+        torch.save(params, "model-for-ec2-mlp.param")
     else: # 評価
         # パラメータの読み込み
-        param_load = torch.load("model.param")
+        param_load = torch.load("model-for-ec2-mlp.param")
         model.load_state_dict(param_load)
         validation(validation_loader, model)
 
@@ -513,14 +544,8 @@ if __name__ == "__main__":
     # for imgs, labels in data_loader: # 1epochで17回 (32バッチ×17=544)
     #     pass
     # print(len(imgs), len(labels))
-
-    
     # print(imgs[0], labels[0])
     # print(imgs, labels)
     
 
     print("{} 枚".format(dataset.__len__()))
-
-    # # パラメータの保存
-    # params = model.state_dict()
-    # torch.save(params, "model.param")

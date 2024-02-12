@@ -41,7 +41,7 @@ https://www.youtube.com/watch?v=AGmkG0wJ8LA
     
     3. EC2内での操作
         3-1. 必要なパッケージをインストール
-            $ sudo apy install python-is-python3
+            $ sudo apt install python-is-python3
             $ sudo apt update
             $ sudo apt install python3-pip
             $ sudo pip install flask
@@ -77,3 +77,10 @@ https://www.youtube.com/watch?v=AGmkG0wJ8LA
             (http://<IPv4アドレス>)
 
             > インスタンス概要の画面から確認可能
+        
+
+    6. 注意事項
+
+        from flask import Makeup だとエラーになる
+
+        > from markupsafe import Markup にすることでエラー回避
