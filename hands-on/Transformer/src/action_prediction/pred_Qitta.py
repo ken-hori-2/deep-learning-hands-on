@@ -38,16 +38,12 @@ multi_data = False # True
 
 if not multi_data:
     "*** 変更前 ***"
-    df = pd.read_csv("test_small.csv",sep=",")
-
-    df = pd.read_csv("test_only_action.csv",sep=",")
-
-
+    # df = pd.read_csv("test_small.csv",sep=",")
     # df = pd.read_csv("gouseizyusi.csv",sep=",")
-    # df = pd.read_csv("kabuka_small.csv",sep=",")
+    df = pd.read_csv("kabuka_small.csv",sep=",")
     df.columns = ["date", "actions"]
     from datetime import datetime as dt
-    df.date = df.date.apply(lambda d: dt.strptime(str(d), "%Y/%m/%d"))
+    df.date = df.date.apply(lambda d: dt.strptime(str(d), "%Y/%m")) # /%d"))
     print("df : ", df)
     # plt.plot(df['date'], df['actions'])
     # plt.show()
@@ -100,37 +96,25 @@ class AirPassengersDataset(Dataset):
         
         if not multi_data:
             #seabornのデータセットから飛行機の搭乗者数のデータをロード
-            df_raw = df # sns.load_dataset('flights')
-            # print("df : ", df_raw)
+            df_raw = sns.load_dataset('flights')
+            print("df : ", df_raw)
 
             "*****"
-            # #訓練用、評価用、テスト用で呼び出すデータを変える
-            # border1s = [0, 12 * 4 - self.seq_len, 12 * 11 - self.seq_len] # 0, 108-3, 132-3
-            # border2s = [12 * 4, 12 * 11, 12 * 12]
-            # border1 = border1s[self.set_type]
-            # border2 = border2s[self.set_type]
-            # # data = df_raw[['passengers']].values
-            # data = df_raw[['actions']].values
-            # print("d : ", data)
-            # ss = StandardScaler()
-            # data = ss.fit_transform(data)
-            # print("border1: {}, boredr2: {}".format(border1, border2))
-            # self.data = data[border1:border2]
-            "*****"
-            data_len = len(df_raw)
-            # print("data len : {}".format(data_len))
-            border1s = [0, 56-self.seq_len, 50]
-            border2s = [56, 38+30, 74]
+            #訓練用、評価用、テスト用で呼び出すデータを変える
+            border1s = [0, 12 * 4 - self.seq_len, 12 * 11 - self.seq_len] # 0, 108-3, 132-3
+            border2s = [12 * 4, 12 * 11, 12 * 12]
             border1 = border1s[self.set_type]
             border2 = border2s[self.set_type]
-            data = df_raw[['actions']].values
+            data = df_raw[['passengers']].values
+            # data = df_raw[['actions']].values
+            print("d : ", data)
             ss = StandardScaler()
             data = ss.fit_transform(data)
-            # print("border1: {}, boredr2: {}".format(border1, border2))
+            print("border1: {}, boredr2: {}".format(border1, border2))
             self.data = data[border1:border2]
-
+            "*****"
             # 試しにかっこを一つ削除
-            data = df_raw[['actions']].values # *0.001 大きすぎるとnanになる
+            # data = df_raw[['actions']].values # *0.001 大きすぎるとnanになる
             # data = df_raw['actions'].values # *0.001 大きすぎるとnanになる
 
             
@@ -168,7 +152,7 @@ def data_provider(flag, seq_len, pred_len, batch_size):
     #データをバッチごとに分けて出力できるDataLoaderを使用
     data_loader = DataLoader(data_set,
                              batch_size=batch_size, 
-                             shuffle=True # これが原因
+                             shuffle=True
                             )
     
     return data_loader
@@ -347,51 +331,25 @@ def evaluate(flag, model, data_provider, criterion):
         pred = torch.cat((src, output), dim=1)
         print("target: ", tgt)
         print("output: ", output.detach().numpy())
-        # plt.plot(true.squeeze().cpu().detach().numpy(), label='true')
-        # plt.plot(pred.squeeze().cpu().detach().numpy(), label='pred')
+        plt.plot(true.squeeze().cpu().detach().numpy(), label='true')
+        plt.plot(pred.squeeze().cpu().detach().numpy(), label='pred')
         # plt.legend()
 
-        data_len = 36 + 12 -1 # 47
+        # data_len = 36 + 12 -1 # 47
         # # plt.style.use("ggplot")
-        # plt.plot(df['date'], df['actions'], label='true')
-        "***"
-        "main__.py ver."
-        index = df["date"][-(seq_len_src)-1:-(seq_len_tgt -1):1] # -37 ~ -11
-        index2 = df["date"][-(seq_len_tgt -1)-1:-1:1] # -11 ~ の予測
-        plt.plot(index, pred.squeeze().cpu().detach().numpy()[-(seq_len_src)-1:-(seq_len_tgt -1):1], label='src(input)') # 'true') # , color="blue") # true.detach())
-        plt.plot(index2, pred.squeeze().cpu().detach().numpy()[-(seq_len_tgt -1)-1:-1:1], label='pred(output)') # , color="green") # true.detach())
-        index_tgt = df["date"][-(seq_len_tgt -1)-1:-1:1] # target
-        plt.plot(index_tgt, true.squeeze().cpu().detach().numpy()[-(seq_len_tgt )-1:-2:1], label='tgt(true)', alpha=0.5) # , color="green") # true.detach())
-        "***"
+        # "***"
+        # "main__.py ver."
+        # index = df["date"][-(36)-1:-(12 -1):1] # -37 ~ -11
+        # index2 = df["date"][-(12 -1)-1:-1:1] # -11 ~ の予測
+        # plt.plot(index, pred.squeeze().cpu().detach().numpy()[-(36)-1:-(12 -1):1], label='src(input)') # 'true') # , color="blue") # true.detach())
+        # plt.plot(index2, pred.squeeze().cpu().detach().numpy()[-(12 -1)-1:-1:1], label='pred(output)') # , color="green") # true.detach())
+        # index_tgt = df["date"][-(12 -1)-1:-1:1] # target
+        # plt.plot(index_tgt, true.squeeze().cpu().detach().numpy()[-(12 )-1:-2:1], label='tgt(true)', alpha=0.5) # , color="green") # true.detach())
+        # "***"
         plt.legend()
         plt.grid(True)
-
-        
-        
-        
-        # y軸を行動に変更, 次の行動を予測
-        " *** ADD *** "
-        next_action_list = [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R"]
-        plt.yticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], next_action_list)
-        print("outputs:", outputs)
-        print("output: ", output)
-        print("target: ", tgt)
-        print("**********")
-        next_action = output.detach().numpy()
-        print("next action pred1: ", next_action[0][0][0])
-        print("next action pred2: ", next_action[0][1][0])
-        print("next action pred3: ", next_action[0][2][0])
-        # print("next action pred1: ", int(next_action[0][0]))
-        # next_action_list = [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R"]
-        print("next action is ... ", next_action_list[round(next_action[0][0][0])])
-        print("next action is ... ", next_action_list[round(next_action[0][1][0])])
-        print("next action is ... ", next_action_list[round(next_action[0][2][0])])
-        " *** ADD *** "
-
         plt.savefig('pred_2.png')
         # plt.savefig('pred.pdf')
-    
-    # print("test : {}".format(seq_len_src))
         
     return np.average(total_loss)
 
@@ -406,10 +364,10 @@ if __name__ == "__main__":
     num_encoder_layers = 1
     num_decoder_layers = 1
     dropout = 0.01
-    src_len = 36 # 18 # 3年分のデータから
-    tgt_len = 12 # 6 # 1年先を予測する
+    src_len = 36 # 3年分のデータから
+    tgt_len = 12 # 1年先を予測する
     batch_size = 1
-    epochs = 30 # 100 # 5 # 0 # 30 # 5 # 0 # 30+70 # 300
+    epochs = 30 # 5 # 0 # 30 # 5 # 0 # 30+70 # 300
     best_loss = float('Inf')
     best_model = None
 

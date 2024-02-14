@@ -15,9 +15,9 @@ from torch.utils.data import Dataset, DataLoader
 from torch.nn import TransformerEncoder, TransformerDecoder, TransformerEncoderLayer, TransformerDecoderLayer
 
 #ランダムシードの設定
-fix_seed = 2023
-np.random.seed(fix_seed)
-torch.manual_seed(fix_seed)
+# fix_seed = 2023
+# np.random.seed(fix_seed)
+# torch.manual_seed(fix_seed)
 
 #デバイスの設定
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -119,8 +119,8 @@ class AirPassengersDataset(Dataset):
             "*****"
             data_len = len(df_raw)
             # print("data len : {}".format(data_len))
-            border1s = [0, 56-self.seq_len, 50]
-            border2s = [56, 38+30, 74]
+            border1s = [0, 56-self.seq_len, 50] # [train0, val0, test0] # test0~test1=24
+            border2s = [56, 38+30, 74]          # [train1, val1, test1]
             border1 = border1s[self.set_type]
             border2 = border2s[self.set_type]
             data = df_raw[['actions']].values
@@ -168,7 +168,8 @@ def data_provider(flag, seq_len, pred_len, batch_size):
     #データをバッチごとに分けて出力できるDataLoaderを使用
     data_loader = DataLoader(data_set,
                              batch_size=batch_size, 
-                             shuffle=True # これが原因
+                            #  shuffle=True # これが原因
+                            shuffle=False # これが原因
                             )
     
     return data_loader
@@ -314,6 +315,25 @@ def train(model, data_provider, optimizer, criterion):
 def evaluate(flag, model, data_provider, criterion):
     model.eval()
     total_loss = []
+    # # print(data_provider)
+    # # print(data_provider.shape())
+    # val_iter = iter(data_provider)
+    # val_imgs, val_labels = val_iter.__next__() # 1バッチ分表示(size=32)
+    # print("*****")
+    # print(val_labels)
+    # print("***************")
+    # Iter = iter(data_provider)
+    # xdata, ydata = next(Iter) #教師データ、ラベルデータ
+    # print(xdata.shape, type(xdata))
+    # print(xdata) 
+    # #torch.Size([3, 64]) <class 'torch.Tensor'>
+    # print("*****")
+
+    # print(ydata.shape)
+    # print(ydata)
+    # #torch.Size([3]) tensor([0, 1, 2])
+    # print("*****")
+
     for src, tgt in data_provider:
         
         src = src.float().to(device)
@@ -339,40 +359,70 @@ def evaluate(flag, model, data_provider, criterion):
         
         loss = criterion(outputs, tgt)
         total_loss.append(loss.cpu().detach())
+        print("out : ", output)
         
     if flag=='test':
         print("src: ", src)
         true = torch.cat((src, tgt), dim=1)
         print("true: ", true)
         pred = torch.cat((src, output), dim=1)
+        # pred = torch.cat((src, outputs), dim=1) # ???
         print("target: ", tgt)
         print("output: ", output.detach().numpy())
+        print("pred  : ", pred.detach().numpy())
         # plt.plot(true.squeeze().cpu().detach().numpy(), label='true')
         # plt.plot(pred.squeeze().cpu().detach().numpy(), label='pred')
-        # plt.legend()
-
-        data_len = 36 + 12 -1 # 47
-        # # plt.style.use("ggplot")
-        # plt.plot(df['date'], df['actions'], label='true')
+        # plt.style.use("ggplot")
+        plt.plot(df['date'][0:-1:1], df['actions'][0:-1:1], label='true')
         "***"
-        "main__.py ver."
-        index = df["date"][-(seq_len_src)-1:-(seq_len_tgt -1):1] # -37 ~ -11
-        index2 = df["date"][-(seq_len_tgt -1)-1:-1:1] # -11 ~ の予測
-        plt.plot(index, pred.squeeze().cpu().detach().numpy()[-(seq_len_src)-1:-(seq_len_tgt -1):1], label='src(input)') # 'true') # , color="blue") # true.detach())
-        plt.plot(index2, pred.squeeze().cpu().detach().numpy()[-(seq_len_tgt -1)-1:-1:1], label='pred(output)') # , color="green") # true.detach())
-        index_tgt = df["date"][-(seq_len_tgt -1)-1:-1:1] # target
-        plt.plot(index_tgt, true.squeeze().cpu().detach().numpy()[-(seq_len_tgt )-1:-2:1], label='tgt(true)', alpha=0.5) # , color="green") # true.detach())
+        "main__this.py ver."
+        index = df["date"][-(seq_len_src)-2:-(seq_len_tgt):1] # -37 ~ -11
+        index2 = df["date"][-(seq_len_tgt)-1:-2:1] # -11 ~ の予測
+        plt.plot(index, pred.squeeze().cpu().detach().numpy()[-(seq_len_src)-1:-(seq_len_tgt-1):1], label='src(input)') # 'true') # , color="blue") # true.detach())
+        plt.plot(index2, pred.squeeze().cpu().detach().numpy()[-(seq_len_tgt):-1:1], label='pred(output)')
+        index_tgt = df["date"][-(seq_len_tgt)-1:-1:1] # target
+        plt.plot(index_tgt, true.squeeze().cpu().detach().numpy()[-(seq_len_tgt)-1:-1:1], label='tgt(true)', alpha=0.5) # , color="green") # true.detach())
         "***"
         plt.legend()
         plt.grid(True)
+        
+        # コメントアウト
+        # pred = torch.cat((src, outputs), dim=1) # ???
+        # print("target: ", tgt)
+        # print("output: ", output.detach().numpy())
+        # print("pred  : ", pred.detach().numpy())
+        # # plt.plot(true.squeeze().cpu().detach().numpy(), label='true')
+        # # plt.plot(pred.squeeze().cpu().detach().numpy(), label='pred')
+        # # plt.legend()
+
+        # data_len = src_len + tgt_len # -1 # 47
+        # # plt.style.use("ggplot")
+        # plt.plot(df['date'][0:-1:1], df['actions'][0:-1:1], label='true')
+        # "***"
+        # "main__.py ver."
+        # index = df["date"][-(seq_len_src)-1:-(seq_len_tgt):1] # -37 ~ -11
+        # index2 = df["date"][-(seq_len_tgt)-1:-1:1] # -11 ~ の予測
+        # # plt.plot(df["date"][-48:data_len:1], pred.squeeze().cpu().detach().numpy()) # [-(seq_len_src)-1:-(seq_len_tgt -1):1], label='src(input)') # 'true') # , color="blue") # true.detach())
+        # # # plt.plot(index2, pred.squeeze().cpu().detach().numpy()) # [-(seq_len_tgt -1)-1:-1:1], label='pred(output)') # , color="green") # true.detach())
+        # # index_tgt = df["date"][-(seq_len_tgt -1)-1:-1:1] # target
+        # # plt.plot(df["date"][-48:data_len:1], true.squeeze().cpu().detach().numpy()) # [-(seq_len_tgt )-1:-2:1], label='tgt(true)', alpha=0.5) # , color="green") # true.detach())
+        # plt.plot(index, pred.squeeze().cpu().detach().numpy()[-(seq_len_src)-1:-(seq_len_tgt):1], label='src(input)') # 'true') # , color="blue") # true.detach())
+        # plt.plot(index2, pred.squeeze().cpu().detach().numpy()[-(seq_len_tgt)-1:-1:1], label='pred(output)')
+        # index_tgt = df["date"][-(seq_len_tgt)-1:-1:1] # target
+        # plt.plot(index_tgt, true.squeeze().cpu().detach().numpy()[-(seq_len_tgt)-1:-1:1], label='tgt(true)', alpha=0.5) # , color="green") # true.detach())
+        # "***"
+        # plt.legend()
+        # plt.grid(True)
+        # コメントアウト
 
         
         
         
         # y軸を行動に変更, 次の行動を予測
         " *** ADD *** "
-        next_action_list = [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R"]
-        plt.yticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], next_action_list)
+        # next_action_list = [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R"]
+        next_action_list = [ "sleep", "wakeup", "breakfast", "tooth brush", "go work", "coffee", "lunch", "coffee", "tooth brush", "drink alchol", "back home", "bath", "TV/Youtube", "study(C++)", "study(AWS)", "study(ML)", "study(other)", "go bed", "TV/Youtube", "sleeping"]
+        plt.yticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], next_action_list)
         print("outputs:", outputs)
         print("output: ", output)
         print("target: ", tgt)
@@ -383,9 +433,9 @@ def evaluate(flag, model, data_provider, criterion):
         print("next action pred3: ", next_action[0][2][0])
         # print("next action pred1: ", int(next_action[0][0]))
         # next_action_list = [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R"]
-        print("next action is ... ", next_action_list[round(next_action[0][0][0])])
-        print("next action is ... ", next_action_list[round(next_action[0][1][0])])
-        print("next action is ... ", next_action_list[round(next_action[0][2][0])])
+        print("(t+1)next action is ... ", next_action_list[round(next_action[0][0][0])])
+        print("(t+2)next action is ... ", next_action_list[round(next_action[0][1][0])])
+        print("(t+3)next action is ... ", next_action_list[round(next_action[0][2][0])])
         " *** ADD *** "
 
         plt.savefig('pred_2.png')
@@ -409,7 +459,7 @@ if __name__ == "__main__":
     src_len = 36 # 18 # 3年分のデータから
     tgt_len = 12 # 6 # 1年先を予測する
     batch_size = 1
-    epochs = 30 # 100 # 5 # 0 # 30 # 5 # 0 # 30+70 # 300
+    epochs = 30 # 30 # 100 # 5 # 0 # 30 # 5 # 0 # 30+70 # 300
     best_loss = float('Inf')
     best_model = None
 
