@@ -38,16 +38,24 @@ multi_data = False # True
 
 if not multi_data:
     "*** 変更前 ***"
-    df = pd.read_csv("test_small.csv",sep=",")
+    # df = pd.read_csv("test_small.csv",sep=",")
 
-    df = pd.read_csv("test_only_action.csv",sep=",")
+    # df = pd.read_csv("test_only_action.csv",sep=",")
+
+    df = pd.read_csv("input.csv",sep=",")
+    # df = df.sort_values(['date'])
 
 
     # df = pd.read_csv("gouseizyusi.csv",sep=",")
     # df = pd.read_csv("kabuka_small.csv",sep=",")
     df.columns = ["date", "actions"]
     from datetime import datetime as dt
-    df.date = df.date.apply(lambda d: dt.strptime(str(d), "%Y/%m/%d"))
+    # df.date = df.date.apply(lambda d: dt.strptime(str(d), "%Y/%m/%d"))
+    df.date = df.date.apply(lambda d: dt.strptime(str(d), '%m%d%H%M%S'))
+
+    df = df.sort_values(['date'])
+
+
     print("df : ", df)
     # plt.plot(df['date'], df['actions'])
     # plt.show()
@@ -62,26 +70,27 @@ if not multi_data:
 else:
     "*** 変更後 ***"
     import pandas as pd
-    df1 = pd.read_csv("kabuka_small_add_day.csv",sep=",")
-    df2 = pd.read_csv("gouseizyusi.csv",sep=",")
-    df3 = pd.read_csv("test_small.csv",sep=",") # pd.read_csv("kabuka_small.csv",sep=",")
-    df1.columns = ["date", "actions"]
-    df2.columns = ["date", "actions"]
-    df3.columns = ["date", "actions"]
-    from datetime import datetime as dt
-    df1.date = df1.date.apply(lambda d: dt.strptime(str(d), "%Y/%m/%d"))
-    df2.date = df2.date.apply(lambda d: dt.strptime(str(d), "%Y/%m/%d"))
-    df3.date = df3.date.apply(lambda d: dt.strptime(str(d), "%Y/%m/%d"))
-    # 時系列データを結合して入力とする
-    # input_data = torch.stack((time_series1, time_series2, time_series3), dim=1)
-    # input_data = torch.stack((df1, df2, df3), dim=1)
-    print("*****")
-    print(df1)
-    print("*****")
-    print(df2)
-    print("*****")
-    print(df3)
-    print("*****")
+    # df1 = pd.read_csv("kabuka_small_add_day.csv",sep=",")
+    # df2 = pd.read_csv("gouseizyusi.csv",sep=",")
+    # df3 = pd.read_csv("test_small.csv",sep=",") # pd.read_csv("kabuka_small.csv",sep=",")
+    # df1.columns = ["date", "actions"]
+    # df2.columns = ["date", "actions"]
+    # df3.columns = ["date", "actions"]
+    # from datetime import datetime as dt
+    # df1.date = df1.date.apply(lambda d: dt.strptime(str(d), "%Y/%m/%d"))
+    # df2.date = df2.date.apply(lambda d: dt.strptime(str(d), "%Y/%m/%d"))
+    # df3.date = df3.date.apply(lambda d: dt.strptime(str(d), "%Y/%m/%d"))
+    # # 時系列データを結合して入力とする
+    # # input_data = torch.stack((time_series1, time_series2, time_series3), dim=1)
+    # # input_data = torch.stack((df1, df2, df3), dim=1)
+    # print("*****")
+    # print(df1)
+    # print("*****")
+    # print(df2)
+    # print("*****")
+    # print(df3)
+    # print("*****")
+    pass
 
 # データのロードと実験用の整形
 class AirPassengersDataset(Dataset):
@@ -137,9 +146,10 @@ class AirPassengersDataset(Dataset):
             self.data = data
             "*****"
         else:
-            input_data = torch.stack((torch.tensor(df1['actions'].values), torch.tensor(df2['actions'].values), torch.tensor(df3['actions'].values)), dim=1)
-            data = input_data
-            self.data = data
+            # input_data = torch.stack((torch.tensor(df1['actions'].values), torch.tensor(df2['actions'].values), torch.tensor(df3['actions'].values)), dim=1)
+            # data = input_data
+            # self.data = data
+            pass
 
     def __getitem__(self, index):
         #学習用の系列と予測用の系列を出力
@@ -347,7 +357,7 @@ def evaluate(flag, model, data_provider, criterion):
         outputs = src[:, -1:, :]
         seq_len_tgt = tgt.shape[1]
     
-        for i in range(seq_len_tgt - 1):
+        for i in range(seq_len_tgt - 1): # tgtの長さ分だけループ
         
             mask_tgt = (generate_square_subsequent_mask(outputs.size(1))).to(device)
         
@@ -373,6 +383,8 @@ def evaluate(flag, model, data_provider, criterion):
         # plt.plot(true.squeeze().cpu().detach().numpy(), label='true')
         # plt.plot(pred.squeeze().cpu().detach().numpy(), label='pred')
         # plt.style.use("ggplot")
+
+        
         plt.plot(df['date'][0:-1:1], df['actions'][0:-1:1], label='true')
         "***"
         "main__this.py ver."
@@ -421,8 +433,69 @@ def evaluate(flag, model, data_provider, criterion):
         # y軸を行動に変更, 次の行動を予測
         " *** ADD *** "
         # next_action_list = [ "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R"]
-        next_action_list = [ "sleep", "wakeup", "breakfast", "tooth brush", "go work", "coffee", "lunch", "coffee", "tooth brush", "drink alchol", "back home", "bath", "TV/Youtube", "study(C++)", "study(AWS)", "study(ML)", "study(other)", "go bed", "TV/Youtube", "sleeping"]
-        plt.yticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], next_action_list)
+        # next_action_list = [ "sleep", "wakeup", "breakfast", "tooth brush", "go work", "coffee", "lunch", "coffee", "tooth brush", "drink alchol", "back home", "bath", "TV/Youtube", "study(C++)", "study(AWS)", "study(ML)", "study(other)", "go bed", "TV/Youtube", "sleeping"]
+        # plt.yticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], next_action_list)
+        next_action_list = [
+            "wakeup",
+            "go work",
+            "breakfast",
+            "coffee",
+            "working",
+            "lunch",
+            "tooth brush",
+            "going out",
+            "meeting",
+            "study(English)",
+            "gym",
+            "buy dinner",
+            "back home",
+            "bath",
+            "study(ML)",
+            "go bed",
+            "study",
+            "Movie",
+            "study(AWS)",
+            "study(other)",
+            "TV/Youtube",
+            "sleep",
+        ]
+        # next_action_list = {
+        #     "wakeup":0,
+        #     "go work":1,
+        #     "breakfast":2,
+        #     "coffee":3,
+        #     "working":4,
+        #     "lunch":5,
+        #     "tooth brush":6,
+        #     "going out":7,
+        #     "meeting":8,
+        #     "study(English)":9,
+        #     "gym":10,
+        #     "buy dinner":11,
+        #     "back home":12,
+        #     "bath":13,
+        #     "study(ML)":14,
+        #     "go bed":15,
+        #     "study":16,
+        #     "Movie":17,
+        #     "study(AWS)":18,
+        #     "study(other)":19,
+        #     "TV/Youtube":20,
+        #     "sleep":21,
+        # }
+        # total_data = df
+        # # total_data = total_data.reset_index(drop=True)
+        # # replace = total_data.sort_values(['date'])
+        # replace = df
+        # print(replace)
+        # # # plt.plot(total_data['date'], pre['actions'])
+        # # plt.plot(replace['date'], replace['actions'], label='actions', color='orange')
+        # plt.legend()
+        plt.yticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21], next_action_list)
+
+        # plt.show()
+
+
         print("outputs:", outputs)
         print("output: ", output)
         print("target: ", tgt)
@@ -436,9 +509,94 @@ def evaluate(flag, model, data_provider, criterion):
         print("(t+1)next action is ... ", next_action_list[round(next_action[0][0][0])])
         print("(t+2)next action is ... ", next_action_list[round(next_action[0][1][0])])
         print("(t+3)next action is ... ", next_action_list[round(next_action[0][2][0])])
-        " *** ADD *** "
+        
+        # 予測期間の日付
+        date = df["date"][-(seq_len_tgt)-1:-2:1]
+        date = date.reset_index(drop=True)
 
-        plt.savefig('pred_2_2.png')
+        pred_date = pd.DataFrame(
+            df["date"][-(seq_len_tgt)-1:-2:1],
+            columns=['date']
+        )
+        # print("date : ", date)
+        pred_date = pred_date.reset_index(drop=True)
+        
+        next = [
+            next_action_list[round(next_action[0][0][0])],
+            next_action_list[round(next_action[0][1][0])],
+            next_action_list[round(next_action[0][2][0])],
+            next_action_list[round(next_action[0][3][0])],
+            next_action_list[round(next_action[0][4][0])],
+            next_action_list[round(next_action[0][5][0])],
+            next_action_list[round(next_action[0][6][0])],
+            next_action_list[round(next_action[0][7][0])],
+            next_action_list[round(next_action[0][8][0])],
+            next_action_list[round(next_action[0][9][0])],
+            next_action_list[round(next_action[0][10][0])],
+        ]
+        print("next : ", next)
+        Actions = pd.DataFrame(
+            next,
+            #  index=[df.shape[0]]
+            columns=['actions'] # , 'date']
+        )
+        print(date)
+        print(Actions)
+        # Actions = pd.DataFrame(
+        #     [date, next],
+        #     #  index=[df.shape[0]]
+        #     columns=['date', 'actions'] # , 'date']
+        # )
+
+        pred_dateand_actions = pd.concat([pred_date, Actions], axis=1)
+        # date = pd.DataFrame(date, Actions)
+        print(pred_dateand_actions)
+
+        pred_dateand_actions.to_csv("pred_date_actions.csv")
+
+        # date.index
+        # 今後を予測したいなら、predのindex(x軸, date)を今後の日付にする
+        print("***** 予測結果 *****")
+        print(f"{date[0]} t=1, action:{next_action_list[round(next_action[0][0][0])]}")
+        print(f"{date[1]} t=2, action:{next_action_list[round(next_action[0][1][0])]}")
+        print(f"{date[2]} t=3, action:{next_action_list[round(next_action[0][2][0])]}")
+
+        true_next_action = tgt.detach().numpy()
+        print("***** 正解 *****")
+        print("true (t+1)next action is ... ", next_action_list[round(true_next_action[0][0][0])])
+        print("true (t+2)next action is ... ", next_action_list[round(true_next_action[0][1][0])])
+        print("true (t+3)next action is ... ", next_action_list[round(true_next_action[0][2][0])])
+        " *** ADD *** "
+        print("***** test *****")
+        # next_action_list = {
+        #     "wakeup":0,
+        #     "go work":1,
+        #     "breakfast":2,
+        #     "coffee":3,
+        #     "working":4,
+        #     "lunch":5,
+        #     "tooth brush":6,
+        #     "going out":7,
+        #     "meeting":8,
+        #     "study(English)":9,
+        #     "gym":10,
+        #     "buy dinner":11,
+        #     "back home":12,
+        #     "bath":13,
+        #     "study(ML)":14,
+        #     "go bed":15,
+        #     "study":16,
+        #     "Movie":17,
+        #     "study(AWS)":18,
+        #     "study(other)":19,
+        #     "TV/Youtube":20,
+        #     "sleep":21,
+        # }
+        # print("(t+1)next action is ... ", next_action_list[round(next_action[0][0][0])])
+        # print("(t+2)next action is ... ", next_action_list[round(next_action[0][1][0])])
+        # print("(t+3)next action is ... ", next_action_list[round(next_action[0][2][0])])
+
+        plt.savefig('actions.png')
         # plt.savefig('pred.pdf')
     
     # print("test : {}".format(seq_len_src))
@@ -459,7 +617,7 @@ if __name__ == "__main__":
     src_len = 36 # 18 # 3年分のデータから
     tgt_len = 12 # 6 # 1年先を予測する
     batch_size = 1
-    epochs = 3 # 30 # 100 # 5 # 0 # 30 # 5 # 0 # 30+70 # 300
+    epochs = 100 # 30 # 100 # 5 # 0 # 30 # 5 # 0 # 30+70 # 300
     best_loss = float('Inf')
     best_model = None
 
@@ -519,3 +677,17 @@ if __name__ == "__main__":
     r = evaluate(flag='test', model=best_model, data_provider=data_provider('test', src_len, tgt_len, batch_size), criterion=criterion)
     print(r)
     # 0.5851381
+
+    # epoch100 result
+    # **********
+    # next action pred1:  5.185531
+    # next action pred2:  4.5317135
+    # next action pred3:  4.9471593
+    # (t+1)next action is ...  lunch
+    # (t+2)next action is ...  lunch
+    # (t+3)next action is ...  lunch
+    # ***** 正解 *****
+    # true (t+1)next action is ...  coffee
+    # true (t+2)next action is ...  tooth brush
+    # true (t+3)next action is ...  lunch
+    # 31.67439

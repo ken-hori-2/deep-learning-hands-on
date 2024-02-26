@@ -1,0 +1,18 @@
+,actions,date
+0,wakeup,600
+1,breakfast,700
+2,coffee,755
+3,working,900
+4,lunch,1200
+5,tooth brush,1230
+6,going out,1400
+7,gym,1900
+8,buy dinner,1930
+9,back home,2100
+10,bath,2130
+11,study,2200
+12,study(AWS),2230
+13,study(other),2300
+14,go bed,2320
+15,TV/Youtube,2330
+16,sleep,2400

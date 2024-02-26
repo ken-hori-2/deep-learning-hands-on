@@ -1,0 +1,5 @@
+actions, date
+'action': 'wakeup', 'date': '0630'
+'action': 'working', 'date': '0900'
+'action': 'study', 'date': '2200'
+'action': 'sleep', 'date': '2350'
